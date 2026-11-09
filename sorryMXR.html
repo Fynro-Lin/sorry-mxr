@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="format-detection" content="telephone=no,email=no,address=no">
+<meta name="theme-color" content="#fdf6f0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>对不起</title>
+<style>
+  :root{
+    --ink:#4a3b34;
+    --ink-soft:#5a4a42;
+    --accent:#d9705f;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{
+    background:#fdf6f0;
+    -webkit-text-size-adjust:100%;
+  }
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+    overflow-x:hidden;
+    position:relative;
+  }
+  /* 柔和背景光晕 */
+  body::before{
+    content:"";
+    position:fixed;
+    left:0;top:0;right:0;bottom:0;
+    z-index:-1;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(255,206,188,.55), transparent 55%),
+      radial-gradient(circle at 88% 88%, rgba(255,226,198,.65), transparent 55%),
+      linear-gradient(165deg,#fff9f5 0%,#fdeee5 55%,#fbe7de 100%);
+  }
+
+  .stage{
+    position:relative;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:40px 18px 48px;
+    padding-bottom:calc(48px + env(safe-area-inset-bottom));
+  }
+
+  /* ================= 封面 ================= */
+  .cover{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:100%;
+    max-width:420px;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:0 18px;
+  }
+  .cover.out{
+    animation:coverOut .6s cubic-bezier(.4,0,.2,1) forwards;
+    pointer-events:none;
+  }
+  @keyframes coverOut{
+    0%{opacity:1;transform:translate(-50%,-50%) scale(1);}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(.88) translateY(-20px);visibility:hidden;}
+  }
+
+  .cover-title{
+    font-size:14px;
+    font-weight:400;
+    color:#a8907f;
+    letter-spacing:2px;
+    line-height:1.8;
+    margin-bottom:38px;
+  }
+
+  /* ---- 信封 ---- */
+  .envelope{
+    position:relative;
+    width:232px;
+    height:150px;
+    cursor:pointer;
+    -webkit-user-select:none;
+    user-select:none;
+    animation:float 3.6s ease-in-out infinite;
+    filter:drop-shadow(0 20px 28px rgba(190,130,105,.30));
+  }
+  @keyframes float{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-9px);}
+  }
+
+  .env-back{
+    position:absolute;
+    left:0;top:0;right:0;bottom:0;
+    border-radius:10px;
+    background:linear-gradient(160deg,#efd6c5,#e2bfa9);
+  }
+
+  .env-letter{
+    position:absolute;
+    left:9%;right:9%;top:12%;
+    height:72%;
+    z-index:1;
+    border-radius:5px;
+    background:linear-gradient(180deg,#fffdfb,#fff7f0);
+    box-shadow:0 4px 12px rgba(170,120,95,.18);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+    letter-spacing:5px;
+    color:#cda78f;
+    transition:transform .55s cubic-bezier(.34,1.15,.64,1) .3s;
+  }
+
+  .env-front{
+    position:absolute;
+    left:0;top:0;right:0;bottom:0;
+    z-index:2;
+    background:linear-gradient(170deg,#f8e3d4 0%,#f0d3bf 58%,#e9c8b1 100%);
+    -webkit-clip-path:polygon(0 0, 50% 46%, 100% 0, 100% 100%, 0 100%);
+    clip-path:polygon(0 0, 50% 46%, 100% 0, 100% 100%, 0 100%);
+  }
+
+  .env-flap{
+    position:absolute;
+    left:0;top:0;
+    width:100%;height:100%;
+    z-index:3;
+    background:linear-gradient(185deg,#fbeade,#f2d7c4);
+    -webkit-clip-path:polygon(0 0, 100% 0, 50% 62%);
+    clip-path:polygon(0 0, 100% 0, 50% 62%);
+    -webkit-transform-origin:top center;
+    transform-origin:top center;
+    -webkit-backface-visibility:hidden;
+    backface-visibility:hidden;
+    transition:transform .55s cubic-bezier(.55,.06,.32,1);
+  }
+
+  .seal{
+    position:absolute;
+    left:50%;top:52%;
+    width:46px;height:46px;
+    margin:-23px 0 0 -23px;
+    z-index:4;
+    border-radius:50%;
+    background:radial-gradient(circle at 34% 28%,#f4908a,#d4584f 72%);
+    box-shadow:0 5px 14px rgba(190,70,60,.38), inset 0 -2px 5px rgba(120,30,25,.28);
+    color:#fff;
+    font-size:17px;
+    line-height:46px;
+    text-align:center;
+    transition:transform .4s,opacity .35s;
+  }
+
+  .envelope.opening .env-flap{
+    transform:rotateX(180deg);
+    opacity:0;
+  }
+  .envelope.opening .env-letter{
+    transform:translateY(-46%);
+  }
+  .envelope.opening .seal{
+    transform:scale(0) rotate(90deg);
+    opacity:0;
+  }
+
+  .hint{
+    margin-top:32px;
+    font-size:13.5px;
+    color:#a8907f;
+    letter-spacing:1.5px;
+    animation:breathe 2.4s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{opacity:.45;}
+    50%{opacity:1;}
+  }
+
+  /* ================= 卡片 ================= */
+  .card{
+    position:relative;
+    z-index:1;
+    display:none;
+    width:100%;
+    max-width:430px;
+    background:linear-gradient(180deg,#fffdfb 0%,#fffaf5 100%);
+    border:1px solid rgba(255,255,255,.9);
+    border-radius:22px;
+    padding:32px 24px 26px;
+    box-shadow:0 24px 60px -24px rgba(180,125,100,.5), 0 2px 8px rgba(180,125,100,.06);
+  }
+  .card.show{display:block;}
+
+  .card-deco{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:24px;
+  }
+  .card-deco span{
+    display:block;
+    width:36px;height:1px;
+    background:linear-gradient(90deg,transparent,#e3c6b5);
+  }
+  .card-deco span:last-child{
+    background:linear-gradient(90deg,#e3c6b5,transparent);
+  }
+  .card-deco i{
+    font-style:normal;
+    color:#e08a72;
+    font-size:12px;
+    margin:0 10px;
+    line-height:1;
+  }
+
+  .card p{
+    font-size:16px;
+    line-height:1.95;
+    color:var(--ink-soft);
+    letter-spacing:.3px;
+    margin-bottom:15px;
+  }
+  .card p.to{
+    font-size:16px;
+    font-weight:600;
+    color:#453530;
+    margin-bottom:20px;
+  }
+  .card p.to b{color:#c25f4f;}
+
+  .card p.lead{
+    font-size:20px;
+    font-weight:600;
+    color:#c25f4f;
+    letter-spacing:3px;
+    margin-bottom:20px;
+  }
+
+  .card p.sign{
+    text-align:right;
+    font-size:15px;
+    color:#8a766b;
+    margin-top:24px;
+    margin-bottom:0;
+  }
+
+  .actions{
+    margin-top:32px;
+  }
+  .btn{
+    display:block;
+    width:100%;
+    padding:15px 12px;
+    border:none;
+    border-radius:14px;
+    font-family:inherit;
+    font-size:16px;
+    letter-spacing:1.5px;
+    cursor:pointer;
+    transition:transform .15s ease,opacity .25s ease,box-shadow .25s ease;
+  }
+  .btn:active{transform:scale(.975);}
+  .btn + .btn{margin-top:12px;}
+  .btn-primary{
+    background:linear-gradient(135deg,#e8846f,#d9654f);
+    color:#fff;
+    box-shadow:0 12px 24px -10px rgba(217,101,79,.8);
+  }
+  .btn-ghost{
+    background:rgba(255,255,255,.75);
+    color:#a08576;
+    border:1px solid rgba(200,165,145,.45);
+  }
+  .btn:disabled{opacity:.6;}
+
+  .reply{
+    margin-top:20px;
+    min-height:22px;
+    text-align:center;
+    font-size:15px;
+    line-height:1.7;
+    color:#c06a58;
+    letter-spacing:.5px;
+    opacity:0;
+    transform:translateY(8px);
+    transition:opacity .55s ease,transform .55s ease;
+  }
+  .reply.show{opacity:1;transform:translateY(0);}
+
+  /* ---- 逐段入场 ---- */
+  .card.show .anim{
+    animation:fadeUp .7s cubic-bezier(.22,.7,.3,1) both;
+  }
+  @keyframes fadeUp{
+    from{opacity:0;transform:translateY(16px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+
+  /* ---- 飘心 ---- */
+  .heart{
+    position:fixed;
+    z-index:999;
+    pointer-events:none;
+    line-height:1;
+    animation:floatUp 1.9s ease-out forwards;
+    will-change:transform,opacity;
+  }
+  @keyframes floatUp{
+    0%{
+      transform:translate(-50%,-50%) scale(.35) rotate(0deg);
+      opacity:0;
+    }
+    18%{opacity:1;}
+    100%{
+      transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.05) rotate(var(--rot));
+      opacity:0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- ============ 封面：信封 ============ -->
+  <div class="cover" id="cover">
+    <p class="cover-title">有一封信，一直没能交到你手上</p>
+
+    <div class="envelope" id="envelope">
+      <div class="env-back"></div>
+      <div class="env-letter">对不起</div>
+      <div class="env-front"></div>
+      <div class="env-flap"></div>
+      <div class="seal">♥</div>
+    </div>
+
+    <p class="hint">轻触信封，拆开</p>
+  </div>
+
+  <!-- ============ 内容：道歉信 ============ -->
+  <section class="card" id="card">
+    <div class="card-deco anim"><span></span><i>♥</i><span></span></div>
+
+    <p class="to anim">致 <b id="toName">你</b>：</p>
+
+    <p class="lead anim">对不起。</p>
+
+    <p class="anim">这三个字很轻，轻到也许抚不平你心里的那点委屈。但我还是想认真地说一遍——不敷衍，不找借口。</p>
+
+    <p class="anim">那天的事，是我做得不好。后来越想越明白，你在意的从来不是那件小事本身，而是我的态度。而我当时，太迟钝了。</p>
+
+    <p class="anim">我不辩解。错了就是错了。</p>
+
+    <p class="anim">我不敢奢求一句“没关系”，只是想让你知道：我很在乎你，比我会表达的多得多。如果让你难过了，那一定是我没做好。</p>
+
+    <p class="anim">如果你愿意，给我一次机会，让我用以后的日子慢慢证明。</p>
+
+    <p class="anim">如果你现在还想生气，也没关系。我不催你，我就在这儿等着。</p>
+
+    <p class="anim">对不起，真的对不起。</p>
+
+    <p class="sign anim">—— <span id="fromName">我</span></p>
+
+    <div class="actions anim">
+      <button class="btn btn-primary" id="forgive" type="button">我原谅你了</button>
+      <button class="btn btn-ghost" id="wait" type="button">我还需要一点时间</button>
+    </div>
+
+    <p class="reply" id="reply"></p>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  var cover     = document.getElementById('cover');
+  var envelope  = document.getElementById('envelope');
+  var card      = document.getElementById('card');
+  var forgiveBtn= document.getElementById('forgive');
+  var waitBtn   = document.getElementById('wait');
+  var reply     = document.getElementById('reply');
+
+  var opened = false;
+
+  /* 逐段入场延迟 */
+  var anims = card.querySelectorAll('.anim');
+  for (var i = 0; i < anims.length; i++) {
+    anims[i].style.animationDelay = (0.1 + i * 0.07).toFixed(2) + 's';
+  }
+
+  /* ---------- 拆信 ---------- */
+  envelope.addEventListener('click', function () {
+    if (opened) return;
+    opened = true;
+
+    envelope.classList.add('opening');
+
+    setTimeout(function () {
+      cover.classList.add('out');
+      card.classList.add('show');
+      setTimeout(function () { cover.style.display = 'none'; }, 700);
+    }, 820);
+  });
+
+  /* ---------- 原谅 ---------- */
+  forgiveBtn.addEventListener('click', function () {
+    var r = forgiveBtn.getBoundingClientRect();
+    burst(r.left + r.width / 2, r.top + r.height / 2);
+
+    forgiveBtn.disabled = true;
+    forgiveBtn.textContent = '谢谢你愿意原谅我 ♥';
+    waitBtn.style.display = 'none';
+
+    reply.textContent = '谢谢你。这一次，我会好好珍惜。';
+    reply.classList.add('show');
+
+    setTimeout(function () {
+      burst(window.innerWidth / 2, window.innerHeight * 0.4);
+    }, 450);
+  });
+
+  /* ---------- 再想想 ---------- */
+  waitBtn.addEventListener('click', function () {
+    var r = waitBtn.getBoundingClientRect();
+    burst(r.left + r.width / 2, r.top + r.height / 2, 10);
+
+    waitBtn.disabled = true;
+    waitBtn.textContent = '我会一直等你';
+
+    reply.textContent = '好，我等你。不管多久，我都在。';
+    reply.classList.add('show');
+  });
+
+  /* ---------- 飘心动画 ---------- */
+  function burst(cx, cy, count) {
+    var emojis = ['❤️', '💕', '💗', '🌸', '✨', '🤍', '💞'];
+    var total = count || 24;
+
+    for (var i = 0; i < total; i++) {
+      (function () {
+        var el = document.createElement('span');
+        el.className = 'heart';
+        el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        el.style.left = cx + 'px';
+        el.style.top  = cy + 'px';
+        el.style.fontSize = (13 + Math.random() * 16) + 'px';
+
+        var dx  = (Math.random() - 0.5) * 260;
+        var dy  = -(100 + Math.random() * 240);
+        var rot = (Math.random() - 0.5) * 160;
+
+        el.style.setProperty('--dx', dx + 'px');
+        el.style.setProperty('--dy', dy + 'px');
+        el.style.setProperty('--rot', rot + 'deg');
+        el.style.animationDelay = (Math.random() * 0.2).toFixed(2) + 's';
+
+        document.body.appendChild(el);
+        setTimeout(function () {
+          if (el.parentNode) el.parentNode.removeChild(el);
+        }, 2400);
+      })();
+    }
+  }
+})();
+</script>
+</body>
+</html>
